@@ -24,6 +24,23 @@ const confirm = async (id) => {
 const cancel = () => {
     message.error('No se eliminó');
 }
+
+const copiarPortapapeles = (id) => {
+    if (!navigator.clipboard) {
+        return message.error('No se pudo copiar');
+    }
+
+    const path = `${window.location.origin}/${id}`;
+
+    navigator.clipboard.writeText(path)
+        .then(() => {
+            message.success('Url copiada');
+        })
+        .catch(error => {
+            message.error('No se pudo copiar');
+        })
+
+}
 </script>
 
 <template>
@@ -58,6 +75,7 @@ const cancel = () => {
                                 <a-button danger :loading="databaseStore.loading" :disabled="databaseStore.loading">Eliminar</a-button>
                             </a-popconfirm>
                             <a-button type="primary" @click="router.push(`/editar/${item.id}`)">Editar</a-button>
+                            <a-button @click="copiarPortapapeles(item.id)">Copiar</a-button>
                         </a-space>
                     </template>
                     <p>{{item.name}}</p>
