@@ -1,6 +1,7 @@
-import { createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword, signOut, updateProfile } from "firebase/auth";
+import { doc, getDoc, setDoc } from "firebase/firestore/lite";
 import { defineStore } from "pinia";
-import { auth } from "../firebaseConfig";
+import { auth, db } from "../firebaseConfig";
 import router from '../router'
 import { useDatabaseStore } from './database'
 
@@ -26,12 +27,30 @@ export const useUserStore = defineStore('userStore', {
                 this.loadingUser = false;
             }
         },
+        async setUser(user) {
+            try {
+                //Como hacer una nueva colección 
+                const docRef = doc(db, "users", user.uid);
+                
+                this.userData = {
+                    email: user.email,
+                    uid: user.uid,
+                    displayName: user.displayName,
+                    photoURL: user.photoURL
+                }
+
+                await setDoc(docRef, this.userData);
+
+            } catch (error) {
+                console.log(error);
+            }
+        },
         async loginUser(email, password) {
             this.loadingUser = true ;
 
             try {
-                const {user} = await  signInWithEmailAndPassword(auth, email, password);
-                this.user = {email: user.email, uid: user.uid}
+                const { user } = await signInWithEmailAndPassword(auth, email, password);
+                await this.setUser(user);
                 router.push("/");
             } catch (error) {
                 console.log(error.code)
@@ -44,20 +63,23 @@ export const useUserStore = defineStore('userStore', {
             //Este no debe de estar afuera de la función
             const databaseSotore = useDatabaseStore();
             databaseSotore.$reset();
-
             try {
-                await signOut(auth)
-                this.userData = null;
                 router.push("/login");
+                await signOut(auth)
             } catch (error) {
                 console.log(error);
             }
         },
         currentUser() {
             return new Promise((resolve, reject) => {
-                const unsuscribe = onAuthStateChanged(auth, user => {
+                const unsuscribe = onAuthStateChanged(auth, async user => {
                     if (user) {
-                        this.userData = {email: user.email, uid: user.uid}
+                        this.userData = {
+                            email: user.email,
+                            uid: user.uid,
+                            displayName: user.displayName,
+                            photoURL: user.photoURL
+                        }
                     } else {
                         this.userData = null;
                         const databaseSotore = useDatabaseStore();
@@ -68,6 +90,18 @@ export const useUserStore = defineStore('userStore', {
                 
                 unsuscribe();
             })
+        },
+        async updateUser(displayName) {
+            try {
+                await updateProfile(auth.currentUser, {
+                    displayName: displayName
+                })
+
+                this.setUser(auth.currentUser);
+            } catch (error) {
+                console.log(error.code);
+                return error.code;
+            }
         } 
     }
 })
