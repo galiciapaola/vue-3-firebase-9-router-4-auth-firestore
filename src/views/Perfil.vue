@@ -12,17 +12,7 @@ const beforeUpload = (file) => {
 }
 
 const onFinish = async() => {
-    const result = await userStore.updateUser(userStore.userData.displayName);
-
-    if (fileList.value[0]) {
-        const resultIMG = await userStore.updateIMG(fileList.value[0]);
-
-        if (resultIMG) {
-            return error.success('Error con la carga de imagen');
-        }
-
-        return message.success('Se actualizó tu imagen');
-    }
+    const result = await userStore.updateUser(userStore.userData.displayName, fileList.value[0]);
 
     if (!result) {
         return message.success('Se actualizó tu información');
