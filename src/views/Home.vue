@@ -3,8 +3,8 @@ import { useUserStore} from '../stores/user'
 import { onAuthStateChanged } from 'firebase/auth'
 import { auth } from '../firebaseConfig';
 import { useDatabaseStore } from '../stores/database';
-import { ref } from 'vue';
 import { useRouter } from 'vue-router'
+import { message } from 'ant-design-vue'
 
 const userStore = useUserStore();
 const databaseStore = useDatabaseStore();
@@ -16,30 +16,53 @@ onAuthStateChanged(auth, (user) => {
 
 databaseStore.getUrls();
 
-const url = ref('');
-
-const handleSubmit = () => {
-    databaseStore.addUrl(url.value);
+const confirm = async (id) => {
+    const result = await databaseStore.deleteUrl(id);
+    if (!result) return message.success('Se eliminó con éxito');
+    return message.error(error);
+} 
+const cancel = () => {
+    message.error('No se eliminó');
 }
 </script>
 
 <template>
-    <h1>Home</h1>
-    <p>{{userStore.userData?.email}}</p>
+    <a-row>
+        <a-col :xs="{span:24}" :sm="{span:12, offset:6}">
+            <h1>Home</h1>
+            <p>{{userStore.userData?.email}}</p>
 
-    <form @submit.prevent="handleSubmit">
-        <input type="text" placeholder="Ingrese URL" v-model="url" />
-        <button type="submit">Agregar</button>
-    </form>
+            <add-form></add-form>
 
-    <p v-if="databaseStore.loadingDoc">Loading docs...</p>
+            <p v-if="databaseStore.loadingDoc">Loading docs...</p>
 
-    <ul v-else>
-        <li v-for="item in databaseStore.documents" :key="item.id">
-            {{item.id}} <br> {{item.name}} <br> {{item.short}}
-            <br>
-            <button @click="databaseStore.deleteUrl(item.id)">Eliminar</button>
-            <button @click="router.push(`/editar/${item.id}`)">Editar</button>
-        </li>
-    </ul>
+            <a-space 
+                direction="vertical"
+                style="width: 100%"
+            >
+                <a-card 
+                    v-for="item of databaseStore.documents"  
+                    :key="item.id"
+                    :title="item.short" 
+                    style="width: 100%"
+                >
+                    <template #extra>
+                        <a-space>
+                            <a-popconfirm
+                                title="Seguro de que lo quieres eliminar?"
+                                ok-text="Sí"
+                                cancel-text="No"
+                                @confirm="confirm(item.id)"
+                                @cancel="cancel"
+                            >
+                                <a-button danger :loading="databaseStore.loading" :disabled="databaseStore.loading">Eliminar</a-button>
+                            </a-popconfirm>
+                            <a-button type="primary" @click="router.push(`/editar/${item.id}`)">Editar</a-button>
+                        </a-space>
+                    </template>
+                    <p>{{item.name}}</p>
+                </a-card>
+            </a-space>
+        </a-col>
+    </a-row>
 </template>
