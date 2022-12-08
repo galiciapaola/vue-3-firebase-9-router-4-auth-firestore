@@ -1,9 +1,10 @@
 import { createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword, signOut, updateProfile } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore/lite";
+import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { defineStore } from "pinia";
-import { auth, db } from "../firebaseConfig";
-import router from '../router'
-import { useDatabaseStore } from './database'
+import { auth, db, storage } from "../firebaseConfig";
+import router from '../router';
+import { useDatabaseStore } from './database';
 
 //Export nombrado para poderlo usar en todos los componentes
 export const useUserStore = defineStore('userStore', {
@@ -102,6 +103,24 @@ export const useUserStore = defineStore('userStore', {
                 console.log(error.code);
                 return error.code;
             }
-        } 
+        },
+        async updateIMG(imagen) {
+            try {
+                const storageRef = ref(storage, `${this.userData.uid}/perfil`);
+
+                await uploadBytes(storageRef, imagen.originFileObj);
+
+                const photoURL = await getDownloadURL(storageRef);
+                
+                await updateProfile(auth.currentUser, {
+                    photoURL 
+                });
+
+                this.setUser(auth.currentUser);
+            } catch (error) {
+                console.log(error.code);
+                return error.code;
+            }
+        }
     }
 })
