@@ -23,7 +23,6 @@ export const useDatabaseStore = defineStore('database', {
                 //Llamada a la base de datos
                 const querySnapshot = await getDocs(q);
                 querySnapshot.forEach(doc => {
-                    console.log(doc.id, doc.data());
                     this.documents.push({
                         id: doc.id,
                         ...doc.data()

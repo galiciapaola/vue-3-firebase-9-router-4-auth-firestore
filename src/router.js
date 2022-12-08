@@ -5,6 +5,7 @@ import Home from './views/Home.vue'
 import Editar from './views/Editar.vue'
 import Login from './views/Login.vue'
 import Register from './views/Register.vue'
+import Perfil from './views/Perfil.vue'
 
 //Para las rutas protegidas 
 const requireAuth = async(to, from, next) => {
@@ -26,7 +27,8 @@ const routes = [
     { path: '/', component: Home, beforeEnter: requireAuth },
     { path: '/editar/:id', component: Editar, beforeEnter: requireAuth },
     { path: '/login', component: Login },
-    { path: '/register', component: Register }
+    { path: '/register', component: Register },
+    { path: '/perfil', component: Perfil, beforeEnter: requireAuth },
 ]
 
 const router = createRouter({
