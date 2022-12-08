@@ -146,6 +146,23 @@ export const useDatabaseStore = defineStore('database', {
             } finally {
                 this.loading = false; 
             }
-        }
+        },
+        async getUrl(id) {
+            try {
+                const docRef = doc(db, 'urls', id);
+                const docSnapshot = await getDoc(docRef);
+
+                if(!docSnapshot.exists()) {
+                    return false;
+                }
+
+                return docSnapshot.data().name;
+            } catch (error) {
+                console.log(error.message);
+                return false;
+            } finally {
+
+            }
+        },
     }
 })

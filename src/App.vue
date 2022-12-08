@@ -30,7 +30,7 @@ watch(() => route.name,  () =>{
           Loading user...
         </div>
 
-        <div>
+        <div v-else>
           <router-view></router-view>
         </div>
       </div>
