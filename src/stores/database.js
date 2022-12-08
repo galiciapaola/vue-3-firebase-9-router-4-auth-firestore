@@ -1,4 +1,4 @@
-import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, query, updateDoc, where } from 'firebase/firestore/lite';
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, query, setDoc, updateDoc, where } from 'firebase/firestore/lite';
 import { defineStore } from 'pinia'
 import { db, auth } from '../firebaseConfig';
 import { nanoid } from 'nanoid'
@@ -46,12 +46,22 @@ export const useDatabaseStore = defineStore('database', {
                     user: auth.currentUser.uid
                 }
 
-                const docRef = await addDoc(collection(db, 'urls'), objetoDoc)
-                console.log(docRef.id);
+                //Agregar un documento con ID dinámico
+                // const docRef = await addDoc(collection(db, 'urls'), objetoDoc);
 
+                /*
                 this.documents.push({
                     ...objetoDoc,
                     id: docRef.id
+                })
+                */
+
+                //Agregar un documento con ID específico
+                await setDoc(doc(db, "urls", objetoDoc.short), objetoDoc);
+
+                this.documents.push({
+                    ...objetoDoc,
+                    id: objetoDoc.short
                 })
             } catch (error) {
                 console.log(error.code);
