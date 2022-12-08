@@ -6,6 +6,7 @@ import Editar from './views/Editar.vue'
 import Login from './views/Login.vue'
 import Register from './views/Register.vue'
 import Perfil from './views/Perfil.vue'
+import NotFound from './views/NotFound.vue'
 
 //Para las rutas protegidas 
 const requireAuth = async(to, from, next) => {
@@ -29,6 +30,7 @@ const routes = [
     { path: '/login', component: Login },
     { path: '/register', component: Register },
     { path: '/perfil', component: Perfil, beforeEnter: requireAuth },
+    { path: '/:pathMatch(.*)*', component: NotFound },
 ]
 
 const router = createRouter({
